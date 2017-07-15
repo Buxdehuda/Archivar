@@ -28,12 +28,16 @@ public class Archivar {
     public static final String FOLDER = PREFS.get("folder", System.getProperty("user.home") + File.separator + "Archivar") + File.separator;
     public static final String SPLIT = Pattern.quote("+");
     
-    Connection conn = connect();
-    private List<Picture> rawPictures = generateRawPictures();
-    private List<Picture> readyPictures = generateReadyPictures();
+    Connection conn;
+    private List<Picture> rawPictures;
+    private List<Picture> readyPictures;
     
     public Archivar() {
-        this.createDatabase();
+    	rawPictures = generateRawPictures();
+    	conn = connect();
+        createDatabase();
+        
+    	readyPictures = generateReadyPictures();
     }
     
     public Connection connect() {
@@ -42,13 +46,12 @@ public class Archivar {
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(Archivar.class.getName()).log(Level.SEVERE, null, ex);
         }
-        Connection tempConn = null;
         try {
-            tempConn = DriverManager.getConnection("jdbc:sqlite:" + FOLDER + "bilder.db");
+            return DriverManager.getConnection("jdbc:sqlite:" + FOLDER + "bilder.db");
         }   catch (SQLException ex) {
             Logger.getLogger(Archivar.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return tempConn;
+        return null;
     }
         
     private void createDatabase() {
@@ -162,7 +165,7 @@ public class Archivar {
     
     private List<Picture> generateReadyPictures() {
         File dir = new File(Picture.FOLDER_READY);
-        dir.mkdirs();
+        dir.mkdir();
         
         List<Picture> pics = new ArrayList<>();
         try (Statement stmt = conn.createStatement()) {
